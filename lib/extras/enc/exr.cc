@@ -23,13 +23,13 @@ std::unique_ptr<Encoder> GetEXREncoder() { return nullptr; }
 
 #else  // JPEGXL_ENABLE_EXR
 
-#include <ImathVec.h>
-#include <ImfIO.h>
-#include <ImfNamespace.h>  // IWYU pragma: keep
-#include <ImfRgba.h>
-#include <ImfRgbaFile.h>
-#include <ImfStandardAttributes.h>
-#include <ImfThreading.h>
+#include <Imath/ImathVec.h>
+#include <OpenEXR/ImfIO.h>
+#include <OpenEXR/ImfNamespace.h>  // IWYU pragma: keep
+#include <OpenEXR/ImfRgba.h>
+#include <OpenEXR/ImfRgbaFile.h>
+#include <OpenEXR/ImfStandardAttributes.h>
+#include <OpenEXR/ImfThreading.h>
 #include <jxl/codestream_header.h>
 #include <jxl/color_encoding.h>
 #include <jxl/types.h>

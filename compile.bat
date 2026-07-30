@@ -2,8 +2,9 @@
 set "ROOT_DIR=%~dp0"
 set "ROOT_DIR=%ROOT_DIR:\=/%"
 
-set "CFLAGS=-flto -O3 -DNDEBUG"
-set "CXXFLAGS=-flto -O3 -DNDEBUG"
+:: we should benchmark these flags
+set "CFLAGS=-flto -O3 -DNDEBUG -march=native"
+set "CXXFLAGS=-flto -O3 -DNDEBUG -march=native"
 
 set CC=clang
 set CXX=clang++
@@ -52,6 +53,46 @@ ninja -C build
 cmake --install build --prefix install
 cd ..
 
+if exist Imath (
+  cd Imath
+  git pull
+) else (
+  git clone https://github.com/AcademySoftwareFoundation/Imath.git
+  cd Imath
+)
+cmake --fresh -B build -G Ninja ^
+  -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW ^
+  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded ^
+  -DBUILD_SHARED_LIBS=OFF ^
+  -DCMAKE_INSTALL_PREFIX="%ROOT_DIR%Imath/install"
+ninja -C build
+cmake --install build --prefix install
+cd ..
+
+if exist openexr (
+  cd openexr
+  git pull
+) else (
+  git clone https://github.com/AcademySoftwareFoundation/openexr.git
+  cd openexr
+)
+cmake --fresh -B build -G Ninja ^
+  -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW ^
+  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded ^
+  -DBUILD_SHARED_LIBS=OFF ^
+  -DOPENEXR_BUILD_TOOLS=OFF ^
+  -DOPENEXR_BUILD_EXAMPLES=OFF ^
+  -DBUILD_TESTING=OFF ^
+  -DCMAKE_PREFIX_PATH="%ROOT_DIR%Imath/install" ^
+  -DCMAKE_CXX_FLAGS="%CXXFLAGS% -msse4.1" ^
+  -DCMAKE_C_FLAGS="%CFLAGS% -msse4.1" ^
+  -DCMAKE_INSTALL_PREFIX="%ROOT_DIR%openexr/install"
+ninja -C build
+cmake --install build --prefix install
+cd ..
+
 set CHERE_INVOKING=1
 (
 echo pacman -S --noconfirm --needed base-devel git
@@ -66,7 +107,7 @@ echo export PATH="/c/Program Files/LLVM/bin:$PATH"
 echo export CC=clang
 echo export CXX=clang++
 echo export AR=llvm-ar
-echo make libgif.a CFLAGS="-std=gnu99 -Wall -O3 -flto -D_MT -Xclang --dependent-lib=libcmt"
+echo make libgif.a CFLAGS="-std=gnu99 -Wall -D_MT -Xclang --dependent-lib=libcmt %CFLAGS%"
 ) | C:\msys64\usr\bin\bash.exe -l
 
 cmake --fresh -B build -G Ninja ^
@@ -75,7 +116,7 @@ cmake --fresh -B build -G Ninja ^
   -DBUILD_TESTING=OFF ^
   -DJPEGXL_ENABLE_BENCHMARK=OFF ^
   -DJPEGXL_ENABLE_MANPAGES=OFF ^
-  -DJPEGXL_ENABLE_OPENEXR=OFF ^
+  -DJPEGXL_ENABLE_OPENEXR=ON ^
   -DJPEGXL_ENABLE_TCMALLOC=OFF ^
   -DZLIB_INCLUDE_DIR="%ROOT_DIR%zlib/install/include" ^
   -DZLIB_LIBRARY="%ROOT_DIR%zlib/install/lib/zs.lib" ^
@@ -84,5 +125,6 @@ cmake --fresh -B build -G Ninja ^
   -DJPEG_INCLUDE_DIR="%ROOT_DIR%libjpeg-turbo/install/include" ^
   -DJPEG_LIBRARY="%ROOT_DIR%libjpeg-turbo/install/lib/jpeg-static.lib" ^
   -DGIF_INCLUDE_DIR="%ROOT_DIR%giflib" ^
-  -DGIF_LIBRARY="%ROOT_DIR%giflib/libgif.a"
+  -DGIF_LIBRARY="%ROOT_DIR%giflib/libgif.a" ^
+  -DCMAKE_PREFIX_PATH="%ROOT_DIR%openexr/install;%ROOT_DIR%Imath/install"
 ninja -C build

@@ -35,12 +35,12 @@ Status DecodeImageEXR(Span<const uint8_t> bytes, const ColorHints& color_hints,
 
 #else  // JPEGXL_ENABLE_EXR
 
-#include <ImfChannelList.h>
-#include <ImfFrameBuffer.h>
-#include <ImfIO.h>
-#include <ImfInputFile.h>
-#include <ImfStandardAttributes.h>
-#include <OpenEXRConfig.h>
+#include <OpenEXR/ImfChannelList.h>
+#include <OpenEXR/ImfFrameBuffer.h>
+#include <OpenEXR/ImfIO.h>
+#include <OpenEXR/ImfInputFile.h>
+#include <OpenEXR/ImfStandardAttributes.h>
+#include <OpenEXR/OpenEXRConfig.h>
 #include <jxl/color_encoding.h>
 #include <jxl/types.h>
 

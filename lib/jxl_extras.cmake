@@ -76,13 +76,21 @@ if(PNG_FOUND)
 endif()
 
 if (JPEGXL_ENABLE_OPENEXR)
-  pkg_check_modules(OpenEXR IMPORTED_TARGET OpenEXR)
+  find_package(OpenEXR CONFIG)
+  if (NOT OpenEXR_FOUND)
+    pkg_check_modules(OpenEXR IMPORTED_TARGET OpenEXR)
+  endif()
   if (OpenEXR_FOUND)
-    target_include_directories(jxl_extras_core-obj PRIVATE
-      "${OpenEXR_INCLUDE_DIRS}"
-    )
     target_compile_definitions(jxl_extras_core-obj PRIVATE -DJPEGXL_ENABLE_EXR=1)
-    list(APPEND JXL_EXTRAS_CODEC_INTERNAL_LIBRARIES PkgConfig::OpenEXR)
+    if (TARGET OpenEXR::OpenEXR)
+      target_link_libraries(jxl_extras_core-obj PRIVATE OpenEXR::OpenEXR)
+      list(APPEND JXL_EXTRAS_CODEC_INTERNAL_LIBRARIES OpenEXR::OpenEXR)
+    else()
+      target_include_directories(jxl_extras_core-obj PRIVATE
+        "${OpenEXR_INCLUDE_DIRS}"
+      )
+      list(APPEND JXL_EXTRAS_CODEC_INTERNAL_LIBRARIES PkgConfig::OpenEXR)
+    endif()
     if(JPEGXL_DEP_LICENSE_DIR)
       configure_file("${JPEGXL_DEP_LICENSE_DIR}/libopenexr-dev/copyright"
                     ${PROJECT_BINARY_DIR}/LICENSE.libopenexr COPYONLY)
